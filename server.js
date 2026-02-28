@@ -18,12 +18,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
-// ─── Razorpay Instance ────────────────────────────────────────────────────────
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
-
 // ─── Routes ───────────────────────────────────────────────────────────────────
 
 /**
@@ -33,6 +27,10 @@ const razorpay = new Razorpay({
  */
 app.post("/create-order", async (req, res) => {
   try {
+        const razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
     const { amount, currency = "INR", receipt } = req.body;
 
     // Validate amount
