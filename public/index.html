@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShopEasy — Mini E-Commerce</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>" />
+  <!-- Bootstrap 5 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Navbar ── -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid px-4">
+      <a class="navbar-brand" href="index.html">Shop<span>Easy</span></a>
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span style="color:#fff;font-size:1.4rem;">☰</span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link active" href="index.html">🏠 Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#products">📦 Products</a></li>
+        </ul>
+        <a class="nav-link cart-btn position-relative" href="cart.html">
+          🛒 Cart
+          <span id="cart-count" style="display:none;">0</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <!-- ── Hero Banner ── -->
+    <div class="page-hero">
+      <h1>🛍️ Welcome to ShopEasy</h1>
+      <p>Discover our premium collection of tech products at unbeatable prices</p>
+    </div>
+
+    <!-- ── Products Section ── -->
+    <section id="products" class="container mb-5">
+      <h2 class="text-center fw-bold mb-1" style="color:#222;">Featured Products</h2>
+      <p class="text-center text-muted mb-4">Top picks just for you</p>
+
+      <div class="row g-4" id="product-grid">
+        <!-- Injected by JavaScript -->
+      </div>
+    </section>
+
+    <!-- ── Features Strip ── -->
+    <section style="background:#fff; padding:2rem 1rem; border-top:2px solid #f0effe; border-bottom:2px solid #f0effe; margin-bottom:2rem;">
+      <div class="container">
+        <div class="row text-center g-3">
+          <div class="col-6 col-md-3">
+            <div style="font-size:1.8rem;">🚚</div>
+            <div class="fw-600 mt-1" style="font-weight:600;font-size:.9rem;">Free Delivery</div>
+            <small class="text-muted">On orders above ₹999</small>
+          </div>
+          <div class="col-6 col-md-3">
+            <div style="font-size:1.8rem;">🔒</div>
+            <div class="fw-600 mt-1" style="font-weight:600;font-size:.9rem;">Secure Payments</div>
+            <small class="text-muted">Razorpay protected</small>
+          </div>
+          <div class="col-6 col-md-3">
+            <div style="font-size:1.8rem;">↩️</div>
+            <div class="fw-600 mt-1" style="font-weight:600;font-size:.9rem;">Easy Returns</div>
+            <small class="text-muted">7-day return policy</small>
+          </div>
+          <div class="col-6 col-md-3">
+            <div style="font-size:1.8rem;">🎧</div>
+            <div class="fw-600 mt-1" style="font-weight:600;font-size:.9rem;">24/7 Support</div>
+            <small class="text-muted">Always here to help</small>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <p>© 2024 ShopEasy. Built with ❤️ using Node.js + Razorpay | Test Mode</p>
+    <p style="margin-top:4px;"><a href="#">Privacy Policy</a> · <a href="#">Terms of Service</a></p>
+  </footer>
+
+  <!-- Toast container -->
+  <div class="toast-wrap"></div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="script.js"></script>
+
+  <script>
+    // ── Render Products ────────────────────────────────────────────────────
+    function renderProducts() {
+      const grid = document.getElementById("product-grid");
+      grid.innerHTML = PRODUCTS.map((p) => `
+        <div class="col-sm-6 col-lg-4">
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <img src="${p.img}" alt="${p.name}" loading="lazy"
+                   onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 200%22><text y=%22.9em%22 font-size=%22160%22>${p.emoji}</text></svg>'">
+            </div>
+            <div class="product-body">
+              <div class="product-name">${p.name}</div>
+              <div class="product-desc">${p.desc}</div>
+              <div class="product-price">${formatCurrency(p.price)} <small>incl. GST</small></div>
+              <button class="btn-add-cart" id="btn-${p.id}" onclick="addToCart('${p.id}')">
+                🛒 Add to Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function addToCart(productId) {
+      Cart.add(productId);
+      const btn = document.getElementById(`btn-${productId}`);
+      const product = PRODUCTS.find((p) => p.id === productId);
+      if (btn) {
+        btn.classList.add("added");
+        btn.textContent = "✅ Added!";
+        setTimeout(() => {
+          btn.classList.remove("added");
+          btn.textContent = "🛒 Add to Cart";
+        }, 1200);
+      }
+      showToast(`${product.name} added to cart!`, "success");
+    }
+
+    renderProducts();
+  </script>
+</body>
+</html>

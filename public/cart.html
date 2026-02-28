@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cart — ShopEasy</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Navbar ── -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid px-4">
+      <a class="navbar-brand" href="index.html">Shop<span>Easy</span></a>
+      <div class="d-flex align-items-center gap-3">
+        <a class="nav-link" href="index.html" style="color:rgba(255,255,255,.85);font-weight:500;">🏠 Home</a>
+        <a class="nav-link cart-btn position-relative" href="cart.html">
+          🛒 Cart
+          <span id="cart-count" style="display:none;">0</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <!-- ── Page Header ── -->
+    <div class="page-hero">
+      <h1>🛒 Your Cart</h1>
+      <p>Review your items before checkout</p>
+    </div>
+
+    <div class="cart-wrapper">
+      <!-- ── Cart Card ── -->
+      <div class="cart-card" id="cart-card">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- ── Continue Shopping ── -->
+      <div class="text-center mt-3">
+        <a href="index.html" style="color:var(--primary);font-weight:600;font-size:.9rem;">
+          ← Continue Shopping
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <p>© 2024 ShopEasy. Built with ❤️ using Node.js + Razorpay | Test Mode</p>
+  </footer>
+
+  <div class="toast-wrap"></div>
+
+  <!-- Razorpay Checkout Script -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="script.js"></script>
+
+  <script>
+    // ── Render Cart ─────────────────────────────────────────────────────────
+    function renderCart() {
+      const cart = Cart.get();
+      const container = document.getElementById("cart-card");
+
+      if (cart.length === 0) {
+        container.innerHTML = `
+          <div class="empty-cart">
+            <div class="empty-icon">🛒</div>
+            <h3>Your cart is empty</h3>
+            <p>Looks like you haven't added any products yet.</p>
+            <a href="index.html" class="btn-add-cart d-inline-block mt-3" style="width:auto;padding:.55rem 2rem;border-radius:8px;text-decoration:none;">
+              Browse Products
+            </a>
+          </div>
+        `;
+        return;
+      }
+
+      const rows = cart.map((item) => `
+        <tr>
+          <td>
+            <div class="cart-item-name">${item.name}</div>
+            <div class="cart-item-qty">Unit: ${formatCurrency(item.price)}</div>
+          </td>
+          <td>
+            <div class="qty-control">
+              <button class="qty-btn" onclick="changeQty('${item.id}', -1)">−</button>
+              <div class="qty-display">${item.qty}</div>
+              <button class="qty-btn" onclick="changeQty('${item.id}', 1)">+</button>
+            </div>
+          </td>
+          <td class="fw-bold" style="color:var(--primary);">${formatCurrency(item.price * item.qty)}</td>
+          <td>
+            <button class="btn-remove" onclick="removeItem('${item.id}')">🗑 Remove</button>
+          </td>
+        </tr>
+      `).join("");
+
+      const total = Cart.total();
+
+      container.innerHTML = `
+        <div style="overflow-x:auto;">
+          <table class="cart-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Subtotal</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+        <div class="cart-summary">
+          <div>
+            <div class="cart-total-label">Total Payable</div>
+            <div class="cart-total-amount">${formatCurrency(total)} <small>incl. GST</small></div>
+          </div>
+          <button class="btn-pay" id="pay-btn" onclick="initiatePayment()">
+            <span class="spinner" id="pay-spinner"></span>
+            <span id="pay-text">Proceed to Pay 🔒</span>
+          </button>
+        </div>
+      `;
+    }
+
+    function changeQty(productId, delta) {
+      const cart = Cart.get();
+      const item = cart.find((i) => i.id === productId);
+      if (!item) return;
+      const newQty = item.qty + delta;
+      if (newQty <= 0) {
+        removeItem(productId);
+        return;
+      }
+      Cart.setQty(productId, newQty);
+      renderCart();
+    }
+
+    function removeItem(productId) {
+      Cart.remove(productId);
+      showToast("Item removed from cart", "info");
+      renderCart();
+    }
+
+    // Initial render
+    renderCart();
+  </script>
+</body>
+</html>

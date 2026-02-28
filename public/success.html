@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Confirmed — ShopEasy</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✅</text></svg>" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Navbar ── -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid px-4">
+      <a class="navbar-brand" href="index.html">Shop<span>Easy</span></a>
+      <a class="nav-link cart-btn position-relative" href="cart.html">
+        🛒 Cart
+        <span id="cart-count" style="display:none;">0</span>
+      </a>
+    </div>
+  </nav>
+
+  <main>
+    <!-- ── Page Header ── -->
+    <div class="page-hero" style="background:linear-gradient(135deg,#28a745,#20c654);">
+      <h1>🎉 Order Confirmed!</h1>
+      <p>Thank you for shopping with ShopEasy</p>
+    </div>
+
+    <div class="success-wrapper">
+      <div class="success-card" id="success-card">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </main>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <p>© 2024 ShopEasy. Built with ❤️ using Node.js + Razorpay | Test Mode</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="script.js"></script>
+
+  <script>
+    // ── Load & Render Order Details ─────────────────────────────────────────
+    function renderSuccess() {
+      const card = document.getElementById("success-card");
+      let order;
+
+      try {
+        order = JSON.parse(sessionStorage.getItem("orderDetails"));
+      } catch {
+        order = null;
+      }
+
+      // If no order data found (e.g. direct navigation), show fallback
+      if (!order) {
+        card.innerHTML = `
+          <div class="success-header">
+            <div class="success-icon">ℹ️</div>
+            <h1>No Order Found</h1>
+            <p>Please complete a purchase first.</p>
+          </div>
+          <div class="success-body">
+            <a href="index.html" class="btn-continue">Go to Shop</a>
+          </div>
+        `;
+        return;
+      }
+
+      // Build items list
+      const itemsHtml = order.items.map((item) => `
+        <div class="order-item">
+          <span class="item-name">${item.name} × ${item.qty}</span>
+          <span class="item-price">${formatCurrency(item.price * item.qty)}</span>
+        </div>
+      `).join("") || "<p class='text-muted' style='font-size:.85rem;'>No item details available</p>";
+
+      card.innerHTML = `
+        <div class="success-header">
+          <div class="success-icon">✅</div>
+          <h1>Payment Successful!</h1>
+          <p>Your order has been placed and is being processed.</p>
+        </div>
+
+        <div class="success-body">
+          <!-- ── Order Details Grid ── -->
+          <div class="detail-grid">
+            <div class="detail-item">
+              <div class="label">Order ID</div>
+              <div class="value">${order.order_id || "N/A"}</div>
+            </div>
+            <div class="detail-item">
+              <div class="label">Payment ID</div>
+              <div class="value">${order.payment_id || "N/A"}</div>
+            </div>
+            <div class="detail-item">
+              <div class="label">Amount Paid</div>
+              <div class="value amount">${formatCurrency(order.amount)}</div>
+            </div>
+            <div class="detail-item">
+              <div class="label">Date & Time</div>
+              <div class="value">${order.date || "N/A"}</div>
+            </div>
+          </div>
+
+          <!-- ── Items Purchased ── -->
+          <div class="items-section">
+            <h5>🛍️ Items Purchased</h5>
+            ${itemsHtml}
+            <div class="order-item" style="font-weight:700;border-top:2px solid #e8e6ff;margin-top:.5rem;padding-top:.75rem;">
+              <span>Total</span>
+              <span style="color:var(--primary);font-size:1.1rem;">${formatCurrency(order.amount)}</span>
+            </div>
+          </div>
+
+          <!-- ── Actions ── -->
+          <a href="index.html" class="btn-continue">🏠 Continue Shopping</a>
+
+          <p class="text-muted mt-3" style="font-size:.78rem;">
+            A confirmation has been sent. Keep your Payment ID for reference.
+          </p>
+        </div>
+      `;
+
+      // Clear session storage after rendering
+      sessionStorage.removeItem("orderDetails");
+    }
+
+    renderSuccess();
+  </script>
+</body>
+</html>
